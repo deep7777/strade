@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 import array
 
-option_type = 'PE'
+option_type = 'CE'
 strikeprices = range(17000,18100,100)
 def row_print(option_type,row,rclose,rhigh,hval,lval,per,rtype):
     print(option_type,' ',row.name,'    ',row['Strike Price'], ' cl = ',rclose, ' rhigh= ', rhigh,'  ',' hval= ', hval, ' lval= ', lval, ' %%= ',per, rtype)
@@ -15,8 +15,10 @@ def row_print(option_type,row,rclose,rhigh,hval,lval,per,rtype):
 for sp in strikeprices:
     mt = 10
     expiry = 27
-    start = date(2022,10,6)
-    end = date(2022,10,20)
+    day = date.today().strftime('%d');
+    print(day,'###')
+    start = date(2022,10,20)
+    end = date(2022,10,int(day))
     expiry_date = date(2022,10,27)
     nifty_opt = get_history(symbol="NIFTY",
                             start=start,

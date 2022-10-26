@@ -22,9 +22,9 @@ dateval = date.today().strftime('%Y-%m-%d');
 print(dateval)
 mt = date.today().strftime('%m');
 day = date.today().strftime('%d');
-
-start = date(2022,1,1)
-end = date(2022,int(mt),int(day))
+iday = int(day)
+start = date(2022,int(mt),iday)
+end = date(2022,int(mt),iday)
 expiry_date = date(2022,10,27)
 
 
@@ -33,11 +33,13 @@ cursor = conn.cursor()
 
 def insertStockData(dateval,symbol,series,prevclose,ropen,high,low,last,close,vwap,volume,turnover,trades,deliverablevolume,deliverable):
     insert_stmt = (
-    	"INSERT INTO stockdata(dateval, symbol,series,prevclose,open,high,low,last,close,vwap,volume,turnover,trades,deliverablevolume,deliverable)" 
-    	"VALUES (%s, %s, %s,%s, %s,%s,%s,%s,%s,%s, %s, %s, %s,%s,%s)"
+    	"INSERT INTO stockdata(dateval, symbol,series,prevclose,open,high,low,last,close,vwap,volume,turnover,trades,deliverablevolume,deliverable,dvlen)" 
+    	"VALUES (%s, %s, %s,%s, %s,%s,%s,%s,%s,%s, %s, %s, %s,%s,%s,%s)"
     )
-    data = (dateval,symbol,series,prevclose,ropen,high,low,last,close,vwap,volume,turnover,trades,deliverablevolume,deliverable)
+    dvlen = len(str(deliverablevolume))
+    data = (dateval,symbol,series,prevclose,ropen,high,low,last,close,vwap,volume,turnover,trades,deliverablevolume,deliverable,dvlen)
     cursor.execute(insert_stmt,data)
+    print(symbol,dvlen)
     conn.commit()
 
 
@@ -67,6 +69,13 @@ def getstock(name):
 		deliverable=row[13]
 		insertStockData(dateval,symbol,series,prevclose,ropen,high,low,last,close,vwap,volume,turnover,trades,deliverablevolume,deliverable)
 
+def findKalabazar():
+	sql = "select dateval,symbol,volume,deliverablevolume,deliverable,close from stockdata where dvlen!=(select len from companies where csymbol=symbol) and dateval='"+dateval+"' order by deliverable desc"
+	cursor.execute(sql)
+	result = cursor.fetchall()
+	for row in result:
+		print(row[0],' symbol',row[1],' volume ',row[2],' deliverable ',row[3],' deliverable ',row[4], ' close ', row[5])
+
 # Retrieving single row
 sql = 'SELECT cname,csymbol,id,options from companies where options=1 order by id asc'
 # Executing the query
@@ -77,6 +86,9 @@ for row in result:
     name = row[1]
     company = row[0]
     options = row[3]
-    getstock(name)
+    #getstock(name)
+
+findKalabazar()
+    
 
    

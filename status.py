@@ -42,42 +42,29 @@ def plotGraph():
     plot.show()
 
 
-def nse_custom_function_secfno(symbol,options,attribute="lastPrice"):
+def nse_custom_function_secfno(symbol,type):
     endp = len(positions['data'])
-    option = '0'
-    if(options == 1):
-        option = '1'
 
     for x in range(0, endp):
         if(positions['data'][x]['symbol']==symbol.upper()):
             data = positions['data'][x]
+            print(data)
             ropen = data['open']
             rhigh = data['dayHigh']
             rlow = data['dayLow']
             volume = data['totalTradedVolume']
-            if(ropen == rhigh):
-                str =  'Sell '+' '+symbol+' '+option+' '+data['open']+' '+data['dayHigh']+' '+data['lastPrice']
-                cnames.append(symbol)
-                prices.append(data['open'])
-                insertData(str,'Sell',symbol,data['open'],option,volume)
-                return str
-            elif(ropen == rlow):
-                str =  'Buy'+' '+symbol+' '+option+' '+data['open']+' '+data['dayLow']+' '+data['lastPrice']
-                cnames.append(symbol)
-                prices.append(data['open'])
-                insertData(str,'Buy',symbol,data['open'],option,volume)
-                return str
-            else:
-                return ''
+            close = data['lastPrice']
+            status = 'failure'
+            if(type=="Sell"):
+            	if(rhigh > close):
+            		status = 'success'
+            elif(type=="Buy"):
+            	if(rlow < close):
+            		status = 'success'
+            updateclose(symbol,data['lastPrice'],status)
+            
 
-def insertData(getData,otype,cname,price,option,volume):
-    insert_stmt = (
-       "INSERT INTO options(name, dateval, otype,cname,price,derivative,volume)"
-       "VALUES (%s, %s, %s, %s,%s,%s,%s)"
-    )
-    data = (getData,dateval,otype,cname,price,option,volume)
-    cursor.execute(insert_stmt, data)
-    #conn.commit()
+
    
 def send_to_telegram(message):
     apiToken = '5624906546:AAHrfJwHVcNgJjwCltjYm9YR2qlxUWUCJIA'
@@ -91,6 +78,17 @@ def send_to_telegram(message):
 
 def updatepoints():
     qry = 'update options o set o.points = (select movement from companies where csymbol=o.cname)'
+    cursor.execute(qry)
+    conn.commit()
+
+def updateclose(csymbol,close,status):
+    qry = "update options o set o.close = "+close+" where o.cname='"+csymbol+"' and o.dateval='"+dateval+"'"
+    qry1 = "update options o set o.status = '"+status+"' where o.cname='"+csymbol+"' and o.dateval='"+dateval+"'"
+    print(qry)
+    cursor.execute(qry)
+    cursor.execute(qry1)
+    conn.commit()
+    print(qry)
     cursor.execute(qry)
     conn.commit()
 
@@ -115,19 +113,17 @@ def stockalerts():
 # Retrieving single row
 
 
-sql = 'SELECT cname,csymbol,options from companies order by id asc'
+sql = "SELECT cname,otype from options where dateval='"+dateval+"'"
+print(sql)
 # Executing the query
 cursor.execute(sql)
 # Fetching 1st row from the table
 result = cursor.fetchall()
 for row in result:
-    company = row[0]
-    name = row[1]
-    options = row[2]
-    nse_custom_function_secfno(name,options)
+    symbol = row[0]
+    otype = row[1]
+    nse_custom_function_secfno(symbol,otype)
         
-updatepoints()
-stockalerts()
 
 # {
 #     'symbol': 'RBLBANK',
