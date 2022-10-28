@@ -35,7 +35,7 @@ dateval = datetime.today().strftime('%Y-%m-%d')
 
 def plotGraph():
     my_conn = create_engine("mysql+mysqldb://root:root@localhost/deepak")
-    query="SELECT concat(cname,'  ',price) as cname,price FROM options"    
+    query="SELECT concat(cname,'  ',price) as cname,price FROM intraday"    
     df = pd.read_sql(query,my_conn)
     print(df)
     df.plot.barh(x="cname", y="price")
@@ -77,13 +77,13 @@ def send_to_telegram(message):
         print(e)
 
 def updatepoints():
-    qry = 'update options o set o.points = (select movement from companies where csymbol=o.cname)'
+    qry = 'update intraday o set o.points = (select movement from companies where csymbol=o.cname)'
     cursor.execute(qry)
     conn.commit()
 
 def updateclose(csymbol,close,status):
-    qry = "update options o set o.close = "+close+" where o.cname='"+csymbol+"' and o.dateval='"+dateval+"'"
-    qry1 = "update options o set o.status = '"+status+"' where o.cname='"+csymbol+"' and o.dateval='"+dateval+"'"
+    qry = "update intraday o set o.close = "+close+" where o.cname='"+csymbol+"' and o.dateval='"+dateval+"'"
+    qry1 = "update intraday o set o.status = '"+status+"' where o.cname='"+csymbol+"' and o.dateval='"+dateval+"'"
     print(qry)
     cursor.execute(qry)
     cursor.execute(qry1)
@@ -93,7 +93,7 @@ def updateclose(csymbol,close,status):
     conn.commit()
 
 def stockalerts():
-    sql = """SELECT DISTINCT(name),cname,otype,price,derivative,volume,points FROM options WHERE dateval = '%s' order by otype asc,volume desc""" % (dateval)
+    sql = """SELECT DISTINCT(name),cname,otype,price,derivative,volume,points FROM intraday WHERE dateval = '%s' order by otype asc,volume desc""" % (dateval)
     # Executing the query
     cursor.execute(sql)
     # Fetching 1st row from the table
@@ -113,7 +113,7 @@ def stockalerts():
 # Retrieving single row
 
 
-sql = "SELECT cname,otype from options where dateval='"+dateval+"'"
+sql = "SELECT cname,otype FROM intraday where dateval='"+dateval+"'"
 print(sql)
 # Executing the query
 cursor.execute(sql)

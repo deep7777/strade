@@ -17,9 +17,9 @@ for sp in strikeprices:
     expiry = 27
     day = date.today().strftime('%d');
     print(day,'###')
-    start = date(2022,10,20)
-    end = date(2022,10,int(day))
-    expiry_date = date(2022,10,27)
+    start = date(2022,1,3)
+    end = date(2022,1,27)#int(day)
+    expiry_date = date(2022,1,27)
     nifty_opt = get_history(symbol="NIFTY",
                             start=start,
                             end=end,
@@ -59,7 +59,7 @@ for sp in strikeprices:
            row_print(option_type,row,rclose,rhigh,hval,lval,per,'STEP2')
            print("#################### end ############################")
         else:
-            print(row.name,'    ',row['Strike Price'],'  ',' cl = ',rclose, ' rhigh= ', rhigh,'  ', '  hval= ',hval, ' lval= ', lval, ' ',' % ',per,'   =    ',row['Change in OI'])
+            print(row.name,'    ',row['Strike Price'],'  ',' open = ',ropen,' cl = ',rclose, ' rhigh= ', rhigh,'  ', '  hval= ',hval, ' lval= ', lval, ' ',' % ',per,'   =    ',row['Change in OI'])
             print("$@$2$@$2$2$@")
         
  

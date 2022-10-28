@@ -25,8 +25,9 @@ cursor = conn.cursor()
 
 #https://www.shellhacks.com/telegram-api-send-message-personal-notification-bot/
 #https://api.telegram.org/bot5624906546:AAHrfJwHVcNgJjwCltjYm9YR2qlxUWUCJIA/getUpdates
-
-positions = nsefetch('https://www.nseindia.com/api/equity-stockIndices?index=SECURITIES%20IN%20F%26O')
+url = 'https://www.nseindia.com/api/equity-stockIndices?index=SECURITIES%20IN%20F%26O'
+print(url)
+positions = nsefetch(url)
 arr = []
 cnames = []
 prices = []
@@ -35,7 +36,7 @@ dateval = datetime.today().strftime('%Y-%m-%d')
 
 def plotGraph():
     my_conn = create_engine("mysql+mysqldb://root:root@localhost/deepak")
-    query="SELECT concat(cname,'  ',price) as cname,price FROM options"    
+    query="SELECT concat(cname,'  ',price) as cname,price FROM intraday"    
     df = pd.read_sql(query,my_conn)
     print(df)
     df.plot.barh(x="cname", y="price")
@@ -57,22 +58,20 @@ def nse_custom_function_secfno(symbol,options,attribute="lastPrice"):
             volume = data['totalTradedVolume']
             if(ropen == rhigh):
                 str =  'Sell '+' '+symbol+' '+option+' '+data['open']+' '+data['dayHigh']+' '+data['lastPrice']
-                cnames.append(symbol)
-                prices.append(data['open'])
                 insertData(str,'Sell',symbol,data['open'],option,volume)
+                print(str)
                 return str
             elif(ropen == rlow):
                 str =  'Buy'+' '+symbol+' '+option+' '+data['open']+' '+data['dayLow']+' '+data['lastPrice']
-                cnames.append(symbol)
-                prices.append(data['open'])
                 insertData(str,'Buy',symbol,data['open'],option,volume)
+                print(str)
                 return str
             else:
                 return ''
 
 def insertData(getData,otype,cname,price,option,volume):
     insert_stmt = (
-       "INSERT INTO options(name, dateval, otype,cname,price,derivative,volume)"
+       "INSERT INTO intraday(name, dateval, otype,cname,price,derivative,volume)"
        "VALUES (%s, %s, %s, %s,%s,%s,%s)"
     )
     data = (getData,dateval,otype,cname,price,option,volume)
@@ -90,12 +89,12 @@ def send_to_telegram(message):
         print(e)
 
 def updatepoints():
-    qry = 'update options o set o.points = (select movement from companies where csymbol=o.cname)'
+    qry = 'update intraday o set o.points = (select movement from companies where csymbol=o.cname)'
     cursor.execute(qry)
     conn.commit()
 
 def stockalerts():
-    sql = """SELECT DISTINCT(name),cname,otype,price,derivative,volume,points FROM options WHERE dateval = '%s' order by otype asc,volume desc""" % (dateval)
+    sql = """SELECT DISTINCT(name),cname,otype,price,derivative,volume,points FROM intraday WHERE dateval = '%s' order by otype asc,volume desc""" % (dateval)
     # Executing the query
     cursor.execute(sql)
     # Fetching 1st row from the table

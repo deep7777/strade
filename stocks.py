@@ -86,7 +86,7 @@ for row in result:
     name = row[1]
     company = row[0]
     options = row[3]
-    #getstock(name)
+    getstock(name)
 
 findKalabazar()
     
