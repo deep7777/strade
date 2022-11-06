@@ -25,9 +25,9 @@ day = date.today().strftime('%d');
 iday = int(day)
 start = date(2022,int(mt),iday)
 end = date(2022,int(mt),iday)
-expiry_date = date(2022,10,27)
+expiry_date = date(2022,11,24)
 
-
+print(start,end,expiry_date)
 cursor = conn.cursor()
 
 

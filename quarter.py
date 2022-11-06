@@ -46,6 +46,7 @@ def plotGraph():
 def quarter_diff(symbol):
     print(symbol)
     quarters = {'2022-01-01':'2022-03-31', '2022-04-01':'2022-06-30','2022-07-01':'2022-09-30','2022-10-01':'2022-12-31'} 
+    quarters = {'2022-10-01':'2022-12-31'} 
     for start, end in quarters.items():
         #print(start,end)
         sql = "select max(high) as high,min(low) as low,round(max(high)-min(low)) as diff from stockdata where symbol='"+symbol+"' and dateval>='"+start+"' and dateval<='"+end+"'"
@@ -103,15 +104,29 @@ def stockalerts():
 # Retrieving single row
 
 
-sql = "SELECT cname,csymbol,options from companies where options='1' order by id asc"
-# Executing the query
-cursor.execute(sql)
-# Fetching 1st row from the table
-result = cursor.fetchall()
-for row in result:
-    company = row[0]
-    name = row[1]
-    quarter_diff(name)
+
+def delQuarter():
+    sql = "delete from quarter where qstart='2022-10-01'"
+    # Executing the query
+    cursor.execute(sql)
+    conn.commit()
+    execQuarter()
+
+def  execQuarter():
+    sql = "SELECT cname,csymbol,options from companies where options='1' order by id asc"
+    # Executing the query
+    cursor.execute(sql)
+    # Fetching 1st row from the table
+    result = cursor.fetchall()
+    for row in result:
+        company = row[0]
+        name = row[1]
+        quarter_diff(name)
+
+delQuarter()
+
+
+
 
 
         
